@@ -15,6 +15,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.dedoxyribose.library.R
 import com.dedoxyribose.library.model.News
 import com.dedoxyribose.library.ui.theme.LowContentAlpha
+import com.dedoxyribose.library.ui.theme.extendedColors
 import com.dedoxyribose.library.utils.DateFormatter
 
 @Composable
@@ -46,7 +47,7 @@ fun NewsItem(news: News) {
         Text(
             text = news.title,
             style = MaterialTheme.typography.h1,
-            color = MaterialTheme.colors.primary
+            color = MaterialTheme.extendedColors.primaryText
         )
         Spacer(modifier = Modifier.size(halfPadding))
         if (news.subtitle != null) {
