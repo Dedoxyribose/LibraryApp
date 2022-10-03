@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -22,7 +23,9 @@ import androidx.navigation.compose.rememberNavController
 import com.dedoxyribose.library.home.HomeScreen
 import com.dedoxyribose.library.navigation.BottomNavigationItem
 import com.dedoxyribose.library.ui.theme.LibraryTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,7 +79,7 @@ fun TopBar(navController: NavController) {
                 contentDescription = null
             )
             Text(
-                text = currentScreen?.title.orEmpty(),
+                text = currentScreen?.titleRes?.let { stringResource(id = it) }.orEmpty(),
                 style = MaterialTheme.typography.h1
             )
         },
@@ -104,7 +107,7 @@ fun BottomNavigationBar(navController: NavController) {
                 icon = {
                     Icon(
                         painterResource(id = screen.icon),
-                        contentDescription = screen.title
+                        contentDescription = stringResource(id = screen.titleRes)
                     )
                 },
                 selectedContentColor = MaterialTheme.colors.secondary,

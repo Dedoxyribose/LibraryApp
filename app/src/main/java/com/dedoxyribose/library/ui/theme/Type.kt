@@ -25,10 +25,15 @@ val Typography = Typography(
         fontWeight = FontWeight.SemiBold,
         fontSize = 20.sp,
     ),
+    h3 = TextStyle(
+        fontFamily = gilroy,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 18.sp,
+    ),
     body1 = TextStyle(
         fontFamily = gilroy,
         fontWeight = FontWeight.Medium,
-        fontSize = 16.sp
+        fontSize = 18.sp
     ),
 
     /* Other default text styles to override
