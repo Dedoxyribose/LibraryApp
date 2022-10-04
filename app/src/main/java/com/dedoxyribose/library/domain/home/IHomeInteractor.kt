@@ -1,7 +1,8 @@
 package com.dedoxyribose.library.domain.home
 
+import androidx.paging.PagingSource
 import com.dedoxyribose.library.model.News
 
 interface IHomeInteractor {
-    suspend fun getNews(): List<News>
+    fun createNewsSource(): PagingSource<Int, News>
 }

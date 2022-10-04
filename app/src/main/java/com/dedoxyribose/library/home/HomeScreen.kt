@@ -3,7 +3,6 @@ package com.dedoxyribose.library.home
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -12,6 +11,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.items
 import com.dedoxyribose.library.R
 import com.dedoxyribose.library.model.News
 import com.dedoxyribose.library.ui.theme.LowContentAlpha
@@ -22,7 +25,9 @@ import com.dedoxyribose.library.utils.DateFormatter
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
-    if (viewModel.uiState.isLoading) {
+    val lazyItems: LazyPagingItems<News> = viewModel.newsFlow.collectAsLazyPagingItems()
+
+    if (lazyItems.loadState.refresh is LoadState.Loading) {
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -31,8 +36,22 @@ fun HomeScreen(
         }
     } else {
         LazyColumn {
-            items(viewModel.uiState.data, key = { it.id }) {
-                NewsItem(it)
+            items(lazyItems) { news ->
+                news?.let {
+                    NewsItem(it)
+                }
+            }
+            if (lazyItems.loadState.append is LoadState.Loading) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(60.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
             }
         }
     }
