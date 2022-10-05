@@ -1,14 +1,16 @@
 package com.dedoxyribose.library
 
+import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -24,6 +26,7 @@ import com.dedoxyribose.library.home.HomeScreen
 import com.dedoxyribose.library.navigation.BottomNavigationItem
 import com.dedoxyribose.library.ui.theme.LibraryTheme
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.*
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -45,19 +48,63 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainScreen() {
+    val realBackStack = remember { ArrayDeque<String>() }
+    val addToRealBackStack = remember { mutableStateOf(true) }
+
     val navController = rememberNavController()
+    registerNavControllerListener(
+        navController = navController,
+        realBackStack = realBackStack,
+        addToRealBackStack = addToRealBackStack
+    )
+
     val scaffoldState = rememberScaffoldState()
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = { TopBar(navController) },
         bottomBar = { BottomNavigationBar(navController) },
-        content = { padding -> // We have to pass the scaffold inner padding to our content. That's why we use Box.
+        content = { padding ->
             Box(modifier = Modifier.padding(padding)) {
-                Navigation(navController = navController, scaffoldState = scaffoldState)
+                Navigation(
+                    navController = navController,
+                    scaffoldState = scaffoldState,
+                    realBackStack = realBackStack,
+                    addToRealBackStack = addToRealBackStack
+                )
             }
         },
-        backgroundColor = MaterialTheme.colors.surface // Set background color to avoid the white flashing when you switch between screens
+        backgroundColor = MaterialTheme.colors.surface
     )
+}
+
+fun registerNavControllerListener(
+    navController: NavController,
+    realBackStack: ArrayDeque<String>,
+    addToRealBackStack: MutableState<Boolean>
+) {
+    navController.addOnDestinationChangedListener { _, destination, _ ->
+        if (addToRealBackStack.value) {
+            if (!realBackStack.contains(destination.route)) {
+                realBackStack.add(destination.route)
+            } else if (realBackStack.contains(destination.route)) {
+                if (destination.route == BottomNavigationItem.HOME.route) {
+                    val homeCount =
+                        Collections.frequency(realBackStack, BottomNavigationItem.HOME.route)
+                    if (homeCount < 2) {
+                        realBackStack.add(destination.route)
+                    } else {
+                        realBackStack.removeLastOccurrence(destination.route)
+                        realBackStack.add(destination.route)
+                    }
+                } else {
+                    realBackStack.remove(destination.route)
+                    realBackStack.add(destination.route)
+                }
+            }
+
+        }
+        addToRealBackStack.value = true
+    }
 }
 
 @Preview(showBackground = true)
@@ -137,19 +184,91 @@ fun BottomNavigationBar(navController: NavController) {
 }
 
 @Composable
-fun Navigation(navController: NavHostController, scaffoldState: ScaffoldState) {
+fun Navigation(
+    realBackStack: ArrayDeque<String>,
+    addToRealBackStack: MutableState<Boolean>,
+    navController: NavHostController,
+    scaffoldState: ScaffoldState
+) {
     NavHost(navController, startDestination = BottomNavigationItem.HOME.route) {
         composable(BottomNavigationItem.HOME.route) {
-            HomeScreen(scaffoldState = scaffoldState)
+            BackPressComposable(
+                realBackStack = realBackStack,
+                addToRealBackStack = addToRealBackStack,
+                navController = navController
+            ) {
+                HomeScreen(scaffoldState = scaffoldState)
+            }
         }
         composable(BottomNavigationItem.SEARCH.route) {
-            HomeScreen(scaffoldState = scaffoldState)
+            BackPressComposable(
+                realBackStack = realBackStack,
+                addToRealBackStack = addToRealBackStack,
+                navController = navController
+            ) {
+                HomeScreen(scaffoldState = scaffoldState)
+            }
         }
         composable(BottomNavigationItem.MY_BOOKS.route) {
-            HomeScreen(scaffoldState = scaffoldState)
+            BackPressComposable(
+                realBackStack = realBackStack,
+                addToRealBackStack = addToRealBackStack,
+                navController = navController
+            ) {
+                HomeScreen(scaffoldState = scaffoldState)
+            }
         }
         composable(BottomNavigationItem.MORE.route) {
-            HomeScreen(scaffoldState = scaffoldState)
+            BackPressComposable(
+                realBackStack = realBackStack,
+                addToRealBackStack = addToRealBackStack,
+                navController = navController
+            ) {
+                HomeScreen(scaffoldState = scaffoldState)
+            }
+        }
+    }
+}
+
+@Composable
+fun BackPressComposable(
+    realBackStack: ArrayDeque<String>,
+    addToRealBackStack: MutableState<Boolean>,
+    navController: NavController,
+    content: @Composable () -> Unit
+) {
+    content()
+    BackPressHandler(
+        realBackStack = realBackStack,
+        addToRealBackStack = addToRealBackStack,
+        navController = navController
+    )
+}
+
+@Composable
+fun BackPressHandler(
+    realBackStack: ArrayDeque<String>,
+    addToRealBackStack: MutableState<Boolean>,
+    navController: NavController
+) {
+    val activity = (LocalContext.current as? Activity)
+    BackHandler {
+        if (realBackStack.size > 1) {
+            realBackStack.removeLast()
+            val destinationRoute = realBackStack.last()
+            addToRealBackStack.value = false
+            navController.navigate(destinationRoute) {
+                popUpTo(navController.graph.findStartDestination().id) {
+                    saveState = true
+                }
+                launchSingleTop = true
+                restoreState = true
+            }
+
+        } else {
+            if (realBackStack.size == 1) {
+                activity?.finish()
+            }
         }
     }
 }
