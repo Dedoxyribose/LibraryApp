@@ -9,9 +9,24 @@ import java.io.IOException
 import javax.inject.Inject
 
 class NewsRepository @Inject constructor() : INewsRepository {
-    override suspend fun getNews(offset: Int): List<News> {
+    override suspend fun getNews(offset: Int, take: Int): List<News> {
         delay(1200)
-        return mockDataList.sortedByDescending { it.date }.drop(offset)
+
+        // симуляция ошибки
+        /*if (Math.random() < 0.5) {
+            throw IOException()
+        }*/
+
+        val from = offset
+        val to = (offset + take).coerceAtMost(mockDataList.size)
+        return if (from < to) {
+            mockDataList.sortedByDescending { it.date }.subList(
+                offset,
+                to
+            )
+        } else {
+            emptyList()
+        }
     }
 
     override fun createNewsDataSource(): PagingSource<Int, News> {
@@ -86,7 +101,7 @@ class NewsRepository @Inject constructor() : INewsRepository {
             date = DateTime.parse("2022-09-22T10:55:00")
         ),
         News(
-            id = 3,
+            id = 4,
             title = "Уроки цветоводства",
             subtitle = "Осень – это самое загадочное время года. ",
             text = "Она подкрадывается тихо и незаметно. " +
@@ -126,7 +141,10 @@ class NewsRepository @Inject constructor() : INewsRepository {
         override suspend fun load(params: LoadParams<Int>): LoadResult<Int, News> {
             return try {
                 val nextPage = params.key ?: 0
-                val newsList = newsRepository.getNews(offset = params.loadSize * nextPage)
+                val newsList = newsRepository.getNews(
+                    offset = params.loadSize * nextPage,
+                    take = params.loadSize
+                )
                 LoadResult.Page(
                     data = newsList,
                     prevKey = if (nextPage == 0) null else nextPage - 1,

@@ -6,9 +6,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
@@ -24,6 +26,7 @@ import com.dedoxyribose.library.utils.DateFormatter
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
+    scaffoldState: ScaffoldState
 ) {
     val lazyItems: LazyPagingItems<News> = viewModel.newsFlow.collectAsLazyPagingItems()
 
@@ -51,6 +54,22 @@ fun HomeScreen(
                     ) {
                         CircularProgressIndicator()
                     }
+                }
+            }
+        }
+        if (lazyItems.loadState.append is LoadState.Error ||
+            lazyItems.loadState.refresh is LoadState.Error
+        ) {
+            val errorText = stringResource(id = R.string.fail_load_error)
+            val retryText = stringResource(id = R.string.retry)
+            LaunchedEffect(Unit) {
+                val snackbarResult = scaffoldState.snackbarHostState.showSnackbar(
+                    message = errorText,
+                    actionLabel = retryText,
+                    duration = SnackbarDuration.Indefinite
+                )
+                if (snackbarResult == SnackbarResult.ActionPerformed) {
+                    lazyItems.retry()
                 }
             }
         }

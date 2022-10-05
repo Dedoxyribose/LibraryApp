@@ -4,6 +4,6 @@ import androidx.paging.PagingSource
 import com.dedoxyribose.library.model.News
 
 interface INewsRepository {
-    suspend fun getNews(offset: Int): List<News>
+    suspend fun getNews(offset: Int, take: Int): List<News>
     fun createNewsDataSource(): PagingSource<Int, News>
 }

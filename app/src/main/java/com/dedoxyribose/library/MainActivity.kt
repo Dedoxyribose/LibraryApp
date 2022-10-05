@@ -46,12 +46,14 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen() {
     val navController = rememberNavController()
+    val scaffoldState = rememberScaffoldState()
     Scaffold(
+        scaffoldState = scaffoldState,
         topBar = { TopBar(navController) },
         bottomBar = { BottomNavigationBar(navController) },
         content = { padding -> // We have to pass the scaffold inner padding to our content. That's why we use Box.
             Box(modifier = Modifier.padding(padding)) {
-                Navigation(navController = navController)
+                Navigation(navController = navController, scaffoldState = scaffoldState)
             }
         },
         backgroundColor = MaterialTheme.colors.surface // Set background color to avoid the white flashing when you switch between screens
@@ -135,19 +137,19 @@ fun BottomNavigationBar(navController: NavController) {
 }
 
 @Composable
-fun Navigation(navController: NavHostController) {
+fun Navigation(navController: NavHostController, scaffoldState: ScaffoldState) {
     NavHost(navController, startDestination = BottomNavigationItem.HOME.route) {
         composable(BottomNavigationItem.HOME.route) {
-            HomeScreen()
+            HomeScreen(scaffoldState = scaffoldState)
         }
         composable(BottomNavigationItem.SEARCH.route) {
-            HomeScreen()
+            HomeScreen(scaffoldState = scaffoldState)
         }
         composable(BottomNavigationItem.MY_BOOKS.route) {
-            HomeScreen()
+            HomeScreen(scaffoldState = scaffoldState)
         }
         composable(BottomNavigationItem.MORE.route) {
-            HomeScreen()
+            HomeScreen(scaffoldState = scaffoldState)
         }
     }
 }
