@@ -1,4 +1,4 @@
-package com.dedoxyribose.library.home
+package com.dedoxyribose.library.screen.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

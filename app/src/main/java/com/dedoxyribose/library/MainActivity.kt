@@ -1,32 +1,32 @@
 package com.dedoxyribose.library
 
-import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
-import com.dedoxyribose.library.home.HomeScreen
+import androidx.navigation.compose.navigation
+import androidx.navigation.navArgument
 import com.dedoxyribose.library.navigation.BottomNavigationItem
+import com.dedoxyribose.library.navigation.core.NestedBottomNavController
+import com.dedoxyribose.library.navigation.core.backPressHandlingComposable
+import com.dedoxyribose.library.navigation.core.nestedBottomNavigator
+import com.dedoxyribose.library.screen.home.HomeScreen
+import com.dedoxyribose.library.screen.newsdetails.NewsDetailsScreen
 import com.dedoxyribose.library.ui.theme.LibraryTheme
 import dagger.hilt.android.AndroidEntryPoint
-import java.util.*
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -34,7 +34,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             LibraryTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
@@ -48,63 +47,25 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainScreen() {
-    val realBackStack = remember { ArrayDeque<String>() }
-    val addToRealBackStack = remember { mutableStateOf(true) }
-
-    val navController = rememberNavController()
-    registerNavControllerListener(
-        navController = navController,
-        realBackStack = realBackStack,
-        addToRealBackStack = addToRealBackStack
+    val nestedBottomNavController = nestedBottomNavigator(
+        BottomNavigationItem.values().asList()
     )
 
     val scaffoldState = rememberScaffoldState()
     Scaffold(
         scaffoldState = scaffoldState,
-        topBar = { TopBar(navController) },
-        bottomBar = { BottomNavigationBar(navController) },
+        topBar = { TopBar(nestedBottomNavController.navController) },
+        bottomBar = { BottomNavigationBar(nestedBottomNavController) },
         content = { padding ->
             Box(modifier = Modifier.padding(padding)) {
                 Navigation(
-                    navController = navController,
+                    nestedBottomNavController = nestedBottomNavController,
                     scaffoldState = scaffoldState,
-                    realBackStack = realBackStack,
-                    addToRealBackStack = addToRealBackStack
                 )
             }
         },
         backgroundColor = MaterialTheme.colors.surface
     )
-}
-
-fun registerNavControllerListener(
-    navController: NavController,
-    realBackStack: ArrayDeque<String>,
-    addToRealBackStack: MutableState<Boolean>
-) {
-    navController.addOnDestinationChangedListener { _, destination, _ ->
-        if (addToRealBackStack.value) {
-            if (!realBackStack.contains(destination.route)) {
-                realBackStack.add(destination.route)
-            } else if (realBackStack.contains(destination.route)) {
-                if (destination.route == BottomNavigationItem.HOME.route) {
-                    val homeCount =
-                        Collections.frequency(realBackStack, BottomNavigationItem.HOME.route)
-                    if (homeCount < 2) {
-                        realBackStack.add(destination.route)
-                    } else {
-                        realBackStack.removeLastOccurrence(destination.route)
-                        realBackStack.add(destination.route)
-                    }
-                } else {
-                    realBackStack.remove(destination.route)
-                    realBackStack.add(destination.route)
-                }
-            }
-
-        }
-        addToRealBackStack.value = true
-    }
 }
 
 @Preview(showBackground = true)
@@ -138,7 +99,7 @@ fun TopBar(navController: NavController) {
 }
 
 @Composable
-fun BottomNavigationBar(navController: NavController) {
+fun BottomNavigationBar(nestedBottomNavController: NestedBottomNavController) {
     val items = listOf(
         BottomNavigationItem.HOME,
         BottomNavigationItem.SEARCH,
@@ -149,34 +110,21 @@ fun BottomNavigationBar(navController: NavController) {
         backgroundColor = MaterialTheme.colors.primary,
         contentColor = MaterialTheme.colors.onPrimary
     ) {
-        val navBackStackEntry by navController.currentBackStackEntryAsState()
-        val currentRoute = navBackStackEntry?.destination?.route
-        items.forEach { screen ->
+        val currentRootRoute = nestedBottomNavController.currentRootRouteAsState()
+        items.forEach { item ->
             BottomNavigationItem(
                 icon = {
                     Icon(
-                        painterResource(id = screen.icon),
-                        contentDescription = stringResource(id = screen.titleRes)
+                        painterResource(id = item.icon),
+                        contentDescription = stringResource(id = item.titleRes)
                     )
                 },
                 selectedContentColor = MaterialTheme.colors.secondary,
                 unselectedContentColor = MaterialTheme.colors.onPrimary,
                 alwaysShowLabel = false,
-                selected = currentRoute == screen.route,
+                selected = currentRootRoute.value == item.route,
                 onClick = {
-                    navController.navigate(screen.route) {
-                        // Pop up to the start destination of the graph to
-                        // avoid building up a large stack of destinations
-                        // on the back stack as users select items
-                        popUpTo(navController.graph.findStartDestination().id) {
-                            saveState = true
-                        }
-                        // Avoid multiple copies of the same destination when
-                        // reselecting the same item
-                        launchSingleTop = true
-                        // Restore state when reselecting a previously selected item
-                        restoreState = true
-                    }
+                    nestedBottomNavController.navigateTo(item.route)
                 }
             )
         }
@@ -185,89 +133,105 @@ fun BottomNavigationBar(navController: NavController) {
 
 @Composable
 fun Navigation(
-    realBackStack: ArrayDeque<String>,
-    addToRealBackStack: MutableState<Boolean>,
-    navController: NavHostController,
+    nestedBottomNavController: NestedBottomNavController,
     scaffoldState: ScaffoldState
 ) {
-    NavHost(navController, startDestination = BottomNavigationItem.HOME.route) {
-        composable(BottomNavigationItem.HOME.route) {
-            BackPressComposable(
-                realBackStack = realBackStack,
-                addToRealBackStack = addToRealBackStack,
-                navController = navController
+    NavHost(
+        nestedBottomNavController.navController,
+        startDestination = BottomNavigationItem.HOME.route
+    ) {
+        navigation(startDestination = "home", route = BottomNavigationItem.HOME.route) {
+            backPressHandlingComposable(
+                "home",
+                nestedBottomNavController = nestedBottomNavController
             ) {
-                HomeScreen(scaffoldState = scaffoldState)
+                HomeScreen(
+                    scaffoldState = scaffoldState,
+                    navController = nestedBottomNavController.navController
+                )
             }
-        }
-        composable(BottomNavigationItem.SEARCH.route) {
-            BackPressComposable(
-                realBackStack = realBackStack,
-                addToRealBackStack = addToRealBackStack,
-                navController = navController
+            backPressHandlingComposable(
+                route = "newsDetails1/{newsId}",
+                arguments = listOf(navArgument("newsId") { type = NavType.LongType }),
+                nestedBottomNavController = nestedBottomNavController
             ) {
-                HomeScreen(scaffoldState = scaffoldState)
-            }
-        }
-        composable(BottomNavigationItem.MY_BOOKS.route) {
-            BackPressComposable(
-                realBackStack = realBackStack,
-                addToRealBackStack = addToRealBackStack,
-                navController = navController
-            ) {
-                HomeScreen(scaffoldState = scaffoldState)
-            }
-        }
-        composable(BottomNavigationItem.MORE.route) {
-            BackPressComposable(
-                realBackStack = realBackStack,
-                addToRealBackStack = addToRealBackStack,
-                navController = navController
-            ) {
-                HomeScreen(scaffoldState = scaffoldState)
-            }
-        }
-    }
-}
 
-@Composable
-fun BackPressComposable(
-    realBackStack: ArrayDeque<String>,
-    addToRealBackStack: MutableState<Boolean>,
-    navController: NavController,
-    content: @Composable () -> Unit
-) {
-    content()
-    BackPressHandler(
-        realBackStack = realBackStack,
-        addToRealBackStack = addToRealBackStack,
-        navController = navController
-    )
-}
+                NewsDetailsScreen(
+                    scaffoldState = scaffoldState,
+                    navController = nestedBottomNavController.navController
+                )
 
-@Composable
-fun BackPressHandler(
-    realBackStack: ArrayDeque<String>,
-    addToRealBackStack: MutableState<Boolean>,
-    navController: NavController
-) {
-    val activity = (LocalContext.current as? Activity)
-    BackHandler {
-        if (realBackStack.size > 1) {
-            realBackStack.removeLast()
-            val destinationRoute = realBackStack.last()
-            addToRealBackStack.value = false
-            navController.navigate(destinationRoute) {
-                popUpTo(navController.graph.findStartDestination().id) {
-                    saveState = true
-                }
-                launchSingleTop = true
-                restoreState = true
             }
+        }
 
-        } else {
-            if (realBackStack.size == 1) {
-                activity?.finish()
+
+        navigation(startDestination = "home2", route = BottomNavigationItem.SEARCH.route) {
+            backPressHandlingComposable(
+                "home2",
+                nestedBottomNavController = nestedBottomNavController
+            ) {
+                HomeScreen(
+                    scaffoldState = scaffoldState,
+                    navController = nestedBottomNavController.navController
+                )
+            }
+            backPressHandlingComposable(
+                route = "newsDetails2/{newsId}",
+                arguments = listOf(navArgument("newsId") { type = NavType.LongType }),
+                nestedBottomNavController = nestedBottomNavController
+            ) {
+
+                NewsDetailsScreen(
+                    scaffoldState = scaffoldState,
+                    navController = nestedBottomNavController.navController
+                )
+
+            }
+        }
+        navigation(startDestination = "home3", route = BottomNavigationItem.MY_BOOKS.route) {
+            backPressHandlingComposable(
+                "home3",
+                nestedBottomNavController = nestedBottomNavController
+            ) {
+                HomeScreen(
+                    scaffoldState = scaffoldState,
+                    navController = nestedBottomNavController.navController
+                )
+            }
+            backPressHandlingComposable(
+                route = "newsDetails/{newsId}",
+                arguments = listOf(navArgument("newsId") { type = NavType.LongType }),
+                nestedBottomNavController = nestedBottomNavController
+            ) {
+
+                NewsDetailsScreen(
+                    scaffoldState = scaffoldState,
+                    navController = nestedBottomNavController.navController
+                )
+
+            }
+        }
+        navigation(startDestination = "home4", route = BottomNavigationItem.MORE.route) {
+            backPressHandlingComposable(
+                "home4",
+                nestedBottomNavController = nestedBottomNavController
+            ) {
+                HomeScreen(
+                    scaffoldState = scaffoldState,
+                    navController = nestedBottomNavController.navController
+                )
+            }
+            backPressHandlingComposable(
+                route = "newsDetails4/{newsId}",
+                arguments = listOf(navArgument("newsId") { type = NavType.LongType }),
+                nestedBottomNavController = nestedBottomNavController
+            ) {
+
+                NewsDetailsScreen(
+                    scaffoldState = scaffoldState,
+                    navController = nestedBottomNavController.navController
+                )
+
             }
         }
     }

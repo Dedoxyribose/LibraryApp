@@ -7,4 +7,5 @@
     <string name="more_title">Ещё</string>
     <string name="fail_load_error">Ошибка загрузки</string>
     <string name="retry">Повторить</string>
+    <string name="read_full_article">Читать далее</string>
 </resources>

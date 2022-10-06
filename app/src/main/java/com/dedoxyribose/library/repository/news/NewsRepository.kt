@@ -152,9 +152,12 @@ class NewsRepository @Inject constructor() : INewsRepository {
                 )
             } catch (exception: IOException) {
                 return LoadResult.Error(exception)
-            }  /*catch (exception: HttpException) {
-                return LoadResult.Error(exception)
-            }*/
+            }
         }
+    }
+
+    override suspend fun getNews(id: Long): News {
+        delay(1200)
+        return mockDataList.first { it.id == id }
     }
 }
