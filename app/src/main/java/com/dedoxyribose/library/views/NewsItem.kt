@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.dedoxyribose.library.R
 import com.dedoxyribose.library.model.News
 import com.dedoxyribose.library.ui.theme.LowContentAlpha
@@ -26,7 +25,7 @@ import com.dedoxyribose.library.utils.DateFormatter
 fun NewsItem(
     news: News,
     partialView: Boolean,
-    navController: NavController
+    onMoveToDetails: ((Long) -> Unit)?
 ) {
     val padding = 24.dp
     val halfPadding = 12.dp
@@ -80,7 +79,7 @@ fun NewsItem(
                 style = MaterialTheme.typography.h3,
                 color = MaterialTheme.colors.secondary,
                 modifier = Modifier.clickable {
-                    navController.navigate("newsDetails/${news.id}")
+                    onMoveToDetails?.invoke(news.id)
                 }
             )
         }

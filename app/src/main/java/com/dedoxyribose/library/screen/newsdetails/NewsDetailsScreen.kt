@@ -16,7 +16,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import com.dedoxyribose.library.R
 import com.dedoxyribose.library.views.NewsItem
 
@@ -24,7 +23,6 @@ import com.dedoxyribose.library.views.NewsItem
 fun NewsDetailsScreen(
     viewModel: NewsDetailsViewModel = hiltViewModel(),
     scaffoldState: ScaffoldState,
-    navController: NavController,
     title: MutableState<String>
 ) {
     title.value = stringResource(id = R.string.news_details_title)
@@ -55,7 +53,7 @@ fun NewsDetailsScreen(
     }
     if (uiState.news != null) {
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-            NewsItem(news = uiState.news, partialView = false, navController = navController)
+            NewsItem(news = uiState.news, partialView = false, onMoveToDetails = null)
         }
     }
 }

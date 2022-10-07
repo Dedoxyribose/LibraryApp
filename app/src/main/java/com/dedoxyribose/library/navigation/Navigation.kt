@@ -28,16 +28,21 @@ enum class BottomNavigationItem(
     MORE_TAB("more_tab", R.drawable.ic_more)
 }
 
-enum class Screen(
+sealed class Screen(
     var route: String,
     var arguments: List<NamedNavArgument> = listOf()
 ) {
-    HOME("home"),
-    SEARCH("search"),
-    MY_BOOKS("myBooks"),
-    MORE("more"),
+    object Home : Screen("home")
+    object Search : Screen("search")
+    object MyBooks : Screen("myBooks")
+    object More : Screen("more")
 
-    NEWS_DETAILS("newsDetails/{newsId}", listOf(navArgument("newsId") { type = NavType.LongType }))
+    object NewsDetails : Screen(
+        "newsDetails/{newsId}",
+        listOf(navArgument("newsId") { type = NavType.LongType })
+    ) {
+        fun createRoute(newsId: Long) = "newsDetails/$newsId"
+    }
 }
 
 
@@ -47,79 +52,77 @@ fun Navigation(
     scaffoldState: ScaffoldState,
     title: MutableState<String>
 ) {
+    val navController = nestedBottomNavController.navController
     NavHost(
-        nestedBottomNavController.navController,
+        navController,
         startDestination = BottomNavigationItem.HOME_TAB.route
     ) {
         navigation(
-            startDestination = Screen.HOME.route,
+            startDestination = Screen.Home.route,
             route = BottomNavigationItem.HOME_TAB.route
         ) {
             backPressHandlingComposable(
-                Screen.HOME.route,
+                Screen.Home.route,
                 nestedBottomNavController = nestedBottomNavController
             ) {
                 HomeScreen(
                     scaffoldState = scaffoldState,
-                    navController = nestedBottomNavController.navController,
+                    onMoveToDetails = {
+                        navController.navigate(Screen.NewsDetails.createRoute(it))
+                    },
                     title = title
                 )
             }
             backPressHandlingComposable(
-                route = Screen.NEWS_DETAILS.route,
-                arguments = Screen.NEWS_DETAILS.arguments,
+                route = Screen.NewsDetails.route,
+                arguments = Screen.NewsDetails.arguments,
                 nestedBottomNavController = nestedBottomNavController
             ) {
                 NewsDetailsScreen(
                     scaffoldState = scaffoldState,
-                    navController = nestedBottomNavController.navController,
                     title = title
                 )
             }
         }
 
-
         navigation(
-            startDestination = Screen.SEARCH.route,
+            startDestination = Screen.Search.route,
             route = BottomNavigationItem.SEARCH_TAB.route
         ) {
             backPressHandlingComposable(
-                Screen.SEARCH.route,
+                Screen.Search.route,
                 nestedBottomNavController = nestedBottomNavController
             ) {
                 SearchScreen(
                     scaffoldState = scaffoldState,
-                    navController = nestedBottomNavController.navController,
                     title = title
                 )
             }
         }
         navigation(
-            startDestination = Screen.MY_BOOKS.route,
+            startDestination = Screen.MyBooks.route,
             route = BottomNavigationItem.MY_BOOKS_TAB.route
         ) {
             backPressHandlingComposable(
-                Screen.MY_BOOKS.route,
+                Screen.MyBooks.route,
                 nestedBottomNavController = nestedBottomNavController
             ) {
                 MyBooksScreen(
                     scaffoldState = scaffoldState,
-                    navController = nestedBottomNavController.navController,
                     title = title
                 )
             }
         }
         navigation(
-            startDestination = Screen.MORE.route,
+            startDestination = Screen.More.route,
             route = BottomNavigationItem.MORE_TAB.route
         ) {
             backPressHandlingComposable(
-                Screen.MORE.route,
+                Screen.More.route,
                 nestedBottomNavController = nestedBottomNavController
             ) {
                 MoreScreen(
                     scaffoldState = scaffoldState,
-                    navController = nestedBottomNavController.navController,
                     title = title
                 )
             }

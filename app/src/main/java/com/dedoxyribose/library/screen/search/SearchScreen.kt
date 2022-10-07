@@ -9,13 +9,11 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.navigation.NavController
 import com.dedoxyribose.library.R
 
 @Composable
 fun SearchScreen(
     scaffoldState: ScaffoldState,
-    navController: NavController,
     title: MutableState<String>
 ) {
     title.value = stringResource(id = R.string.search_title)

@@ -17,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -30,7 +29,7 @@ import com.dedoxyribose.library.views.NewsItem
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
     scaffoldState: ScaffoldState,
-    navController: NavController,
+    onMoveToDetails: (Long) -> Unit,
     title: MutableState<String>
 ) {
     title.value = stringResource(id = R.string.home_title)
@@ -48,7 +47,7 @@ fun HomeScreen(
         LazyColumn {
             items(lazyItems) { news ->
                 news?.let {
-                    NewsItem(it, true, navController)
+                    NewsItem(it, true, onMoveToDetails)
                 }
             }
             if (lazyItems.loadState.append is LoadState.Loading) {
