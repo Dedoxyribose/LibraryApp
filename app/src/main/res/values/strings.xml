@@ -7,8 +7,19 @@
     <string name="more_title">Ещё</string>
     <string name="news_details_title">Новость</string>
 
+    <string name="popular">Популярное</string>
+    <string name="drama">Драма</string>
+    <string name="epic">Эпос</string>
+    <string name="adventures">Приключения</string>
+    <string name="comedy">Комедия</string>
+    <string name="detective">Детектив</string>
+    <string name="fantastic">Фантастика</string>
+    <string name="fantasy">Фэнтези</string>
+    <string name="fairy_tale">Сказка</string>
+
     <string name="fail_load_error">Ошибка загрузки</string>
     <string name="retry">Повторить</string>
 
     <string name="read_full_article">Читать новость полностью</string>
+    <string name="page_count">%d стр.</string>
 </resources>
