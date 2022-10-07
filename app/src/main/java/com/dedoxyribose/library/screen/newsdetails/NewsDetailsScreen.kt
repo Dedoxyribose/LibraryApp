@@ -14,6 +14,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.dedoxyribose.library.R
@@ -25,7 +26,10 @@ fun NewsDetailsScreen(
     scaffoldState: ScaffoldState,
     title: MutableState<String>
 ) {
-    title.value = stringResource(id = R.string.news_details_title)
+    val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        title.value = context.getString(R.string.news_details_title)
+    }
 
     val uiState = viewModel.uiState
 

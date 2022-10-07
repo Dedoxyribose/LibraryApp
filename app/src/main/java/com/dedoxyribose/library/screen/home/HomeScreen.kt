@@ -14,6 +14,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -32,7 +33,10 @@ fun HomeScreen(
     onMoveToDetails: (Long) -> Unit,
     title: MutableState<String>
 ) {
-    title.value = stringResource(id = R.string.home_title)
+    val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        title.value = context.getString(R.string.home_title)
+    }
 
     val lazyItems: LazyPagingItems<News> = viewModel.newsFlow.collectAsLazyPagingItems()
 

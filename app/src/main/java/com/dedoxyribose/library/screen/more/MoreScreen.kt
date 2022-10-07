@@ -5,10 +5,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
 import com.dedoxyribose.library.R
 
 @Composable
@@ -16,7 +17,11 @@ fun MoreScreen(
     scaffoldState: ScaffoldState,
     title: MutableState<String>
 ) {
-    title.value = stringResource(id = R.string.more_title)
+    val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        title.value = context.getString(R.string.more_title)
+    }
+
 
     Box(
         modifier = Modifier.fillMaxSize(),

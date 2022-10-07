@@ -31,7 +31,10 @@ fun SearchScreen(
     scaffoldState: ScaffoldState,
     title: MutableState<String>
 ) {
-    title.value = stringResource(id = R.string.search_title)
+    val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        title.value = context.getString(R.string.search_title)
+    }
 
     val lazyItems: LazyPagingItems<Book> = viewModel.booksFlow.collectAsLazyPagingItems()
 
