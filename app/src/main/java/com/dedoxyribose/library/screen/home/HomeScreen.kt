@@ -11,6 +11,7 @@ import androidx.compose.material.SnackbarDuration
 import androidx.compose.material.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -29,8 +30,11 @@ import com.dedoxyribose.library.views.NewsItem
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
     scaffoldState: ScaffoldState,
-    navController: NavController
+    navController: NavController,
+    title: MutableState<String>
 ) {
+    title.value = stringResource(id = R.string.home_title)
+
     val lazyItems: LazyPagingItems<News> = viewModel.newsFlow.collectAsLazyPagingItems()
 
     if (lazyItems.loadState.refresh is LoadState.Loading) {

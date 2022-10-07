@@ -35,10 +35,12 @@ fun nestedBottomNavigator(
         bottomNavigationItems = bottomNavigationItems
     )
 
-    registerNavControllerListener(
-        navController = navController,
-        navigationState = navigationState
-    )
+    LaunchedEffect(Unit) {
+        registerNavControllerListener(
+            navController = navController,
+            navigationState = navigationState
+        )
+    }
 
     return NestedBottomNavController(navController, navigationState)
 }

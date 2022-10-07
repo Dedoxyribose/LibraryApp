@@ -11,6 +11,7 @@ import androidx.compose.material.SnackbarDuration
 import androidx.compose.material.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -23,8 +24,11 @@ import com.dedoxyribose.library.views.NewsItem
 fun NewsDetailsScreen(
     viewModel: NewsDetailsViewModel = hiltViewModel(),
     scaffoldState: ScaffoldState,
-    navController: NavController
+    navController: NavController,
+    title: MutableState<String>
 ) {
+    title.value = stringResource(id = R.string.news_details_title)
+
     val uiState = viewModel.uiState
 
     if (uiState.isLoading) {
