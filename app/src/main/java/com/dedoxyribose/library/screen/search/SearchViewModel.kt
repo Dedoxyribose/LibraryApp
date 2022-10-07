@@ -14,7 +14,7 @@ class SearchViewModel @Inject constructor(
     private val interactor: IBooksSearchInteractor
 ) : ViewModel() {
 
-    val booksFlow = Pager(PagingConfig(pageSize = 2, initialLoadSize = 2)) {
+    val booksFlow = Pager(PagingConfig(pageSize = 5, initialLoadSize = 6)) {
         interactor.createBookSource()
     }.flow
         .cachedIn(viewModelScope)

@@ -12,6 +12,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dedoxyribose.library.navigation.BottomNavigationItem
@@ -82,7 +83,9 @@ fun TopBar(title: MutableState<String>) {
             )
             Text(
                 text = title.value,
-                style = MaterialTheme.typography.h1
+                style = MaterialTheme.typography.h1,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         },
         backgroundColor = MaterialTheme.colors.primary,

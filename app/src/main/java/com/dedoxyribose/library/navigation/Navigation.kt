@@ -12,6 +12,7 @@ import com.dedoxyribose.library.R
 import com.dedoxyribose.library.navigation.core.IBottomNavigationItem
 import com.dedoxyribose.library.navigation.core.NestedBottomNavController
 import com.dedoxyribose.library.navigation.core.backPressHandlingComposable
+import com.dedoxyribose.library.screen.bookdetails.BookDetailsScreen
 import com.dedoxyribose.library.screen.home.HomeScreen
 import com.dedoxyribose.library.screen.more.MoreScreen
 import com.dedoxyribose.library.screen.mybooks.MyBooksScreen
@@ -42,6 +43,13 @@ sealed class Screen(
         listOf(navArgument("newsId") { type = NavType.LongType })
     ) {
         fun createRoute(newsId: Long) = "newsDetails/$newsId"
+    }
+
+    object BookDetails : Screen(
+        "bookDetails/{bookId}",
+        listOf(navArgument("bookId") { type = NavType.LongType })
+    ) {
+        fun createRoute(bookId: Long) = "bookDetails/$bookId"
     }
 }
 
@@ -94,6 +102,19 @@ fun Navigation(
                 nestedBottomNavController = nestedBottomNavController
             ) {
                 SearchScreen(
+                    scaffoldState = scaffoldState,
+                    onMoveToDetails = {
+                        navController.navigate(Screen.BookDetails.createRoute(it))
+                    },
+                    title = title
+                )
+            }
+            backPressHandlingComposable(
+                route = Screen.BookDetails.route,
+                arguments = Screen.BookDetails.arguments,
+                nestedBottomNavController = nestedBottomNavController
+            ) {
+                BookDetailsScreen(
                     scaffoldState = scaffoldState,
                     title = title
                 )
