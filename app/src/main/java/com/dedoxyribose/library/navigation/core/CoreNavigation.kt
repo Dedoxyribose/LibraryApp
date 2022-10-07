@@ -3,6 +3,7 @@ package com.dedoxyribose.library.navigation.core
 import android.app.Activity
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.*
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -26,8 +27,8 @@ data class NavigationState(
 fun nestedBottomNavigator(
     bottomNavigationItems: List<IBottomNavigationItem>
 ): NestedBottomNavController {
-    val realBackStack = remember { mutableStateOf(listOf<String>()) }
-    val addToRealBackStack = remember { mutableStateOf(true) }
+    val realBackStack = rememberSaveable { mutableStateOf(listOf<String>()) }
+    val addToRealBackStack = rememberSaveable { mutableStateOf(true) }
     val navController = rememberNavController()
     val navigationState = NavigationState(
         realBackStack = realBackStack,
