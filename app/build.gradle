@@ -7,12 +7,12 @@ plugins {
 
 android {
     namespace 'com.dedoxyribose.library'
-    compileSdk 32
+    compileSdk 33
 
     defaultConfig {
         applicationId "com.dedoxyribose.library"
         minSdk 21
-        targetSdk 32
+        targetSdk 33
         versionCode 1
         versionName "1.0"
 
@@ -85,4 +85,6 @@ dependencies {
     implementation 'joda-time:joda-time:2.11.2'
 
     implementation 'androidx.paging:paging-compose:1.0.0-alpha10'
+
+    implementation "com.github.skydoves:landscapist-glide:2.0.0"
 }
