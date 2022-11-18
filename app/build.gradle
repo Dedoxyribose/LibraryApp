@@ -6,6 +6,14 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        release {
+            storeFile file('C:\\Users\\Vertfour\\librarykey2.jks')
+            storePassword '12345test'
+            keyAlias 'key0'
+            keyPassword '12345test'
+        }
+    }
     namespace 'com.dedoxyribose.library'
     compileSdk 33
 
@@ -20,6 +28,7 @@ android {
         vectorDrawables {
             useSupportLibrary true
         }
+        signingConfig signingConfigs.release
     }
 
     buildTypes {
