@@ -9,7 +9,11 @@ import java.io.IOException
 import javax.inject.Inject
 
 class BookRepository @Inject constructor() : IBookRepository {
-    override suspend fun getBooks(offset: Int, take: Int): List<Book> {
+    override suspend fun getBooks(
+        searchRequest: BookSearchRequest?,
+        offset: Int,
+        take: Int
+    ): List<Book> {
         delay(800)
 
         // симуляция ошибки
@@ -17,10 +21,14 @@ class BookRepository @Inject constructor() : IBookRepository {
             throw IOException()
         }*/
 
+        val filteredList = mockDataList.filter {
+            hasSearchStringIn(searchString = searchRequest?.searchText, it.author, it.title)
+        }
+
         val from = offset
-        val to = (offset + take).coerceAtMost(mockDataList.size)
+        val to = (offset + take).coerceAtMost(filteredList.size)
         return if (from < to) {
-            mockDataList.sortedByDescending { it.id }.subList(
+            filteredList.sortedByDescending { it.id }.subList(
                 offset,
                 to
             )
@@ -29,8 +37,12 @@ class BookRepository @Inject constructor() : IBookRepository {
         }
     }
 
-    override fun createBookDataSource(): PagingSource<Int, Book> {
-        return BookSource(this)
+    private fun hasSearchStringIn(searchString: String?, vararg text: String): Boolean {
+        return text.any { it.lowercase().contains(searchString.orEmpty().lowercase()) }
+    }
+
+    override fun createBookDataSource(bookSearchRequest: BookSearchRequest): PagingSource<Int, Book> {
+        return BookSource(this, bookSearchRequest)
     }
 
     private val mockDataList = listOf(
@@ -134,7 +146,8 @@ class BookRepository @Inject constructor() : IBookRepository {
     )
 
     class BookSource(
-        private val bookRepository: IBookRepository
+        private val bookRepository: IBookRepository,
+        private val bookSearchRequest: BookSearchRequest
     ) : PagingSource<Int, Book>() {
 
         override fun getRefreshKey(state: PagingState<Int, Book>): Int? {
@@ -145,8 +158,9 @@ class BookRepository @Inject constructor() : IBookRepository {
             return try {
                 val nextPage = params.key ?: 0
                 val bookList = bookRepository.getBooks(
+                    searchRequest = bookSearchRequest,
                     offset = params.loadSize * nextPage,
-                    take = params.loadSize
+                    take = params.loadSize,
                 )
                 LoadResult.Page(
                     data = bookList,

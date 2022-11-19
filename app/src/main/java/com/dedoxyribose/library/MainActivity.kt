@@ -75,6 +75,7 @@ fun TopBar(title: MutableState<String>) {
 
     TopAppBar(
         modifier = Modifier.height(70.dp),
+        elevation = 0.dp,
         title = {
             Image(
                 modifier = Modifier.size(width = 48.dp, height = 48.dp),
