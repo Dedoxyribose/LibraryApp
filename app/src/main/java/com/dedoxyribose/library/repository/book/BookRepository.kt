@@ -21,8 +21,11 @@ class BookRepository @Inject constructor() : IBookRepository {
             throw IOException()
         }*/
 
-        val filteredList = mockDataList.filter {
-            hasSearchStringIn(searchString = searchRequest?.searchText, it.author, it.title)
+        val genreFilterEmpty = searchRequest == null || searchRequest.genres.isEmpty()
+        val filteredList = mockDataList.filter { book ->
+            hasSearchStringIn(searchString = searchRequest?.searchText, book.author, book.title) &&
+                    (genreFilterEmpty ||
+                            searchRequest?.genres?.any { genre -> genre in book.genres } == true)
         }
 
         val from = offset

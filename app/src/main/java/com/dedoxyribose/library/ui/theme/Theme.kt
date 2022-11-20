@@ -35,11 +35,13 @@ private val LightColorPalette = lightColors(
 )
 
 private val extendedLightColors = ExtendedColors(
-    primaryText = Purple
+    primaryText = Purple,
+    graySurface = GraySurface
 )
 
 private val extendedDarkColors = ExtendedColors(
-    primaryText = Color.White
+    primaryText = Color.White,
+    graySurface = GraySurfaceForDark
 )
 
 private val LocalExtendedColors = staticCompositionLocalOf { extendedLightColors }

@@ -6,6 +6,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import com.dedoxyribose.library.domain.books.search.IBooksSearchInteractor
+import com.dedoxyribose.library.model.Genre
 import com.dedoxyribose.library.repository.book.BookSearchRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -23,9 +24,11 @@ class SearchViewModel @Inject constructor(
         const val SEARCH_DEBOUNCE_MS = 300
     }
 
-    private val searchRequest = MutableStateFlow(BookSearchRequest(""))
+    private val searchRequest = MutableStateFlow(BookSearchRequest("", emptySet()))
 
     val searchText = searchRequest.map { it.searchText }
+
+    val selectedGenres = searchRequest.map { it.genres }
 
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     val booksFlow = searchRequest
@@ -40,5 +43,17 @@ class SearchViewModel @Inject constructor(
 
     fun onSearchTextChange(searchText: String) {
         searchRequest.value = searchRequest.value.copy(searchText = searchText)
+    }
+
+    fun onGenreSelectionChange(genre: Genre, selected: Boolean) {
+        searchRequest.value = searchRequest.value.copy(
+            genres = searchRequest.value.genres.toMutableSet().apply {
+                if (selected) {
+                    add(genre)
+                } else {
+                    remove(genre)
+                }
+            }
+        )
     }
 }

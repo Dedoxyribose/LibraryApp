@@ -7,10 +7,13 @@ val Purple = Color(0xFF2D142C)
 val PurpleLighter = Color(0xFF510A32)
 val PurpleLightest = Color(0xFF801336)
 val Apricot = Color(0xFFEE4540)
+val GraySurface = Color(0x22000000)
+val GraySurfaceForDark = Color(0x22FFFFFF)
 
 val LowContentAlpha = 0.45f
 
 @Immutable
 data class ExtendedColors(
     val primaryText: Color,
+    val graySurface: Color
 )

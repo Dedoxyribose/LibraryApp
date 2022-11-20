@@ -21,7 +21,9 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import com.dedoxyribose.library.R
 import com.dedoxyribose.library.model.Book
+import com.dedoxyribose.library.model.Genre
 import com.dedoxyribose.library.views.BookItem
+import com.dedoxyribose.library.views.ChipGroup
 
 @Composable
 fun SearchScreen(
@@ -37,6 +39,8 @@ fun SearchScreen(
 
     Column {
         SearchBar(viewModel)
+
+        GenreBar(viewModel)
 
         val lazyItems: LazyPagingItems<Book> = viewModel.booksFlow.collectAsLazyPagingItems()
 
@@ -117,4 +121,21 @@ fun SearchBar(viewModel: SearchViewModel) {
             textStyle = MaterialTheme.typography.caption
         )
     }
+}
+
+@Composable
+fun GenreBar(viewModel: SearchViewModel) {
+    val genres = viewModel.selectedGenres.collectAsState(emptySet())
+    val context = LocalContext.current
+    ChipGroup(
+        dataList = Genre.values().asList(),
+        selected = genres.value,
+        dataToText = { context.getString(it.titleRes) },
+        onSelectionChanged = { genre, isSelected ->
+            viewModel.onGenreSelectionChange(
+                genre,
+                isSelected
+            )
+        }
+    )
 }
